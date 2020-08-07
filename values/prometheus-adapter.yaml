@@ -1,0 +1,18 @@
+logLevel: 6
+prometheus:
+  url: http://prometheus-operated.monitoring.svc
+rules:
+  default: false
+  custom:
+    - seriesQuery: '{__name__="nginx_ingress_controller_requests"}'
+      resources:
+        overrides:
+          exported_namespace:
+            resource: "namespace"
+          ingress:
+            group: networking.k8s.io
+            resource: ingress
+      name:
+        matches: "^(.*)"
+        as: "requests-per-second"
+      metricsQuery: 'sum(irate(nginx_ingress_controller_requests{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
