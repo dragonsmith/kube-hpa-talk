@@ -47,7 +47,7 @@ helm install ingress \
 ### Demo application deploy
 
 The following cmd will populate Deployment, Service and Ingress controller for our test app.
-The app & its Deployment were taken from the [official example](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/) 
+The app & its Deployment were taken from the [official example](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)
 I've added only Ingress resource.
 
 ```shell
@@ -55,6 +55,24 @@ kubectl apply -f app.yaml
 ```
 
 ## Example walkthrough
+
+### Let's check current pods for our application
+
+```shell
+kubetl get po
+```
+
+Only one pod should exist.
+
+### Load our app with requests
+
+Let's load our app with some requests for new Ingress metrics to appear
+
+```shell
+while true; do
+  curl -H 'Host: apache.example.com' http://localhost
+done
+```
 
 ### Install & configure Prometheus Adapter
 
@@ -65,7 +83,17 @@ helm install prometheus-adapter \
   -f values/prometheus-adapter.yaml
 ```
 
+### Check if new metrics appeared inside Metrics API
+
+```shell
+kubectl get --raw '/apis/custom.metrics.k8s.io/v1beta1' | jq
+```
+
+At this moment, if you are not familiar with the Metrics API itself you do not know how to debug further. It is not a problem at all, let's make K8s to show us an example.
+
 ### Apply HPA resource manifest
+
+K8s' HPA controller will start to run API requests to Metrics API as soon as we will apply our first HPA resource.
 
 ```shell
 kubectl apply -f hpa.yaml
@@ -77,15 +105,23 @@ kubectl apply -f hpa.yaml
 kubectl describe hpa.v2beta2.autoscaling php-apache
 ```
 
-### Load our app with requests
+### Check Prometheus Adapter logs
+
+We will immediately see the actual requests inside Prometheus Adapter logs.
 
 ```shell
-while true; do
-  curl -H 'Host: apache.example.com' http://localhost
-done
+kubectl logs -n monitoring -l app=prometheus-adapter -f
+```
+
+### Let's try to run them manually too
+
+```shell
+kubectl get --raw '/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/ingresses.networking.k8s.io/php-apache/requests-per-second' | jq
 ```
 
 ### Watch how new pods appear or disappear
+
+If there are no errors in the configuration you will see your result soon:
 
 ```shell
 kubectl get po -w
