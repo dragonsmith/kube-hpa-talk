@@ -1,5 +1,9 @@
 # Kubernetes HPA talk sandbox
 
+This repo contains [the slides itself](https://github.com/dragonsmith/kube-hpa-talk/blob/master/Kubernetes%20HPA.pdf)  & a step by step example.
+
+It is impossible to squeeze full knowledge about Kubernetes HPA into a 30 minutes talks so [the slides](https://github.com/dragonsmith/kube-hpa-talk/blob/master/Kubernetes%20HPA.pdf) contain a lot of useful links, which will help you to dive deeper into the topic.
+
 ## Preparations
 
 ### Sandbox cluster
